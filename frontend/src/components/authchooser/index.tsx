@@ -33,7 +33,11 @@ interface ReactRouterLocationStateIface {
   from?: Location;
 }
 
-function AuthChooser() {
+export interface AuthChooserProps {
+  children?: React.ReactNode;
+}
+
+function AuthChooser({ children }: AuthChooserProps) {
   const history = useHistory();
   const location = useLocation();
   const clusters = useClustersConf();
@@ -43,6 +47,7 @@ function AuthChooser() {
   const { from = { pathname: createRouteURL('cluster') } } = (location.state ||
     {}) as ReactRouterLocationStateIface;
   const clusterName = getCluster() as string;
+  const { t } = useTranslation('auth');
 
   let clusterAuthType = '';
   if (clusters && clusters[clusterName]) {
@@ -146,9 +151,17 @@ function AuthChooser() {
 
   return (
     <PureAuthChooser
-      testingTitle={numClusters > 1 ? `Getting auth info: ${clusterName}` : 'Getting auth info'}
+      testingTitle={
+        numClusters > 1
+          ? t('Getting auth info: {{ clusterName }}', { clusterName })
+          : t('Getting auth info')
+      }
       testingAuth={testingAuth}
-      title={numClusters > 1 ? `Authentication: ${clusterName}` : 'Authentication'}
+      title={
+        numClusters > 1
+          ? t('Authentication: {{ clusterName }}', { clusterName })
+          : t('Authentication')
+      }
       haveClusters={!!clusters && Object.keys(clusters).length > 1}
       error={error}
       oauthUrl={`${helpers.getAppUrl()}oidc?dt=${Date()}&cluster=${getCluster()}`}
@@ -171,7 +184,9 @@ function AuthChooser() {
           }),
         });
       }}
-    />
+    >
+      {children}
+    </PureAuthChooser>
   );
 }
 
@@ -187,6 +202,7 @@ export interface PureAuthChooserProps {
   handleTokenAuth: () => void;
   handleTryAgain: () => void;
   handleBackButtonPress: () => void;
+  children?: React.ReactNode;
 }
 
 export function PureAuthChooser({
@@ -201,6 +217,7 @@ export function PureAuthChooser({
   handleTokenAuth,
   handleTryAgain,
   handleBackButtonPress,
+  children,
 }: PureAuthChooserProps) {
   const { t } = useTranslation('auth');
 
@@ -281,6 +298,7 @@ export function PureAuthChooser({
           </Box>
         </Box>
       )}
+      {children}
     </ClusterDialog>
   );
 }
